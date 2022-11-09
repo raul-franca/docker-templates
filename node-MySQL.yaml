@@ -1,0 +1,36 @@
+version: "3"
+
+services:
+  app:
+    build:
+      context: ./node # diretório origem do Dockerfile
+      dockerfile: Dockerfile # Tipo do arquivo ex Dockerfile.prod
+    image: raulfranca/node #nome da imagem
+    container_name: app
+    networks:
+      - node-network
+    volumes:
+      - ./node:/usr/src/app
+    tty: true #permite acesso a o terminal
+    ports:
+      - "3000:3000"
+    depends_on: #Indica que deve aguardar contêiner db subir
+      - db
+  db:
+    platform: linux/x86_64
+    image: mysql:5.7
+    command: --innodb-use-native-aio=0
+    container_name: db
+    restart: always
+    tty: true
+    volumes:
+      - ./mysql:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=nodedb
+      - MYSQL_ROOT_PASSWORD=root
+    networks:
+      - node-network
+
+networks:
+  node-network:
+    driver: bridge
